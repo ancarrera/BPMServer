@@ -1,26 +1,26 @@
 extends layout
 
 block content
-  h1= title
-  h2 Welcome to #{title}
-  p
-  h3 API METHODS
-  p
-  p GET /users/{id} => {id}:user_id
-  p GET /users/{id}/measurements  =>  {id}:user_id
-  p GET /login (only text/html)
-  p GET /register (only text/html)
-  p
-  p POST /login  =>  post_attributes: email,password
-  p POST /users/{id}/measurements/{lan}  =>  {id}: user_id, {lan}:language [en,es] post_attributes: systolic pressure, diastolic pressure, pulse
-  p POST /users/{id}  =>  {id}: user_id
-  p POST /users/{id}  =>   {id}: user_id post_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
-  p
-  p
-  p PUT /users/{id}  =>  {id}: user_id    put_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
-  p
-  p
-  p DELETE /users/{id}  =>  {id}: user_id
-  p
-  p All methods offers html and JSON except GET /login and  GET /register
+  .conainer
+    nav.jumbotron
+      h1= title
+      p
+      p
+      p GET /users/{id} => {id}:user_id
+      p GET /users/{id}/measurements  =>  {id}:user_id
+      p GET /login (only text/html)
+      p GET /register (only text/html)
+      p
+      p POST /login  =>  post_attributes: email,password
+      p POST /users/{id}/measurements/{lan}  =>  {id}: user_id, {lan}:language [en,es] post_attributes: systolic pressure, diastolic pressure, pulse
+      p POST /users/{id}  =>  {id}: user_id
+      p POST /users/{id}  =>   {id}: user_id post_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
+      p
+      p
+      p PUT /users/{id}  =>  {id}: user_id    put_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
+      p
+      p
+      p DELETE /users/{id}  =>  {id}: user_id
+      p
+      p All methods offers html and JSON except GET /login and  GET /register
 

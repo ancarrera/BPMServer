@@ -6,3 +6,25 @@ body {
 a {
   color: #00B7FF;
 }
+
+.jumbotron .container{
+
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  height: 100%;
+}
+.container {
+  display: table;
+  vertical-align: middle;
+}
+.vertical-center-row {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.logintitle{
+  font: 50px "Lucida Grande";
+}

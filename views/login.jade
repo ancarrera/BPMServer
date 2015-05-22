@@ -1,0 +1,23 @@
+//Created by Adrian on 21/5/15.
+extends layout
+
+block content
+   div.container(style='text-align: center')
+      div.row
+         div.span5.offset2
+         br
+         br
+         form.form-horizontal(action='/login', method='post')
+            fieldset
+               legend(class='logintitle') LOGIN
+               div.control-group
+                  label.control-label(for='inputUserName') #{header1}
+                  div.controls
+                     input#inputUserName.input-large(class='username',style='margin-top: 15px',name='username', type='text', placeholder='Username', required)
+               div.control-group
+                  label.control-label(for='inputPassword') #{header2}
+                  div.controls
+                     input#inputPassword.input-large(style='margin-top: 15px', name='password', type='password', placeholder='Password', required)
+               div.control-group
+                  div.controls
+         button.btn.btn-primary(style='margin-top: 20px',type='submit') Sign In
