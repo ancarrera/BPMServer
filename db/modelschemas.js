@@ -5,22 +5,22 @@ var mongoose = require('mongoose');
 var Schema =  mongoose.Schema;
 
 var MeasuremetsSchema = new Schema({
-    'systolic':String,
-    'diastolic':String,
-    'pulse':String,
-    'date':String
+    'systolic':{type:String,default:""},
+    'diastolic':{type:String,default:""},
+    'pulse':{type:String,default:""},
+    'date':{type:String,default:""}
 });
 
 var UserSchema = new Schema({
 
-    'name':String,
-    'firstsurname':String,
-    'secondsurname':String,
-    'age':String,
-    'city':String,
-    'administration':String,
-    'country':String,
-    'password':String,
+    'name':{type:String,default:""},
+    'firstsurname':{ type:String,default:""},
+    'secondsurname':{ type:String,default:""},
+    'age':{ type:String,default:""},
+    'city':{ type:String,default:""},
+    'administration':{ type:String,default:""},
+    'country':{ type:String,default:""},
+    'password':{ type:String,default:""},
     'totalinsertions':{ type:Number,default:0},
     'measurements':{ type:[MeasuremetsSchema],index:true}
 
@@ -31,3 +31,7 @@ var User = mongoose.model('User',UserSchema);
 
 exports.User = User;
 exports.Measurement = Measurement;
+exports.handleDBError = function (err, res) {
+
+    res.status(500).send('Internal error reading in DB');
+}

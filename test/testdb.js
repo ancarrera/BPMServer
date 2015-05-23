@@ -14,21 +14,11 @@ router.get("/test",function(req,res,next) {
     user.firstsurname = 'Pardo';
     user.secondsurname = 'Pardo';
 
-    user.save(function (err) {
-        if (err)
-            console.log('Error saving user');
-        else
-            console.log('Saveeeeee')
-    });
-    console.log(JSON.stringify(user));
+    user.save();
 
-    //var query = User.findOne({'name': 'Pepe'});
-    //query.select('*');
-    //query.exec(function (err, user) {
-    //    if (err) return handleError(err);
-    //    console.log('Return query value %s ', user.name);
-    //});
-    res.send(JSON.stringify(user));
+    var userresult = User.where('name', 'Pepe').exec();
+
+    console.log(JSON.stringify(user));
 });
 
 module.exports = router;
