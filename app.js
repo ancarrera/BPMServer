@@ -7,12 +7,18 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var _ = require('underscore');
 var mongodb = require('mongodb');
+var mongoose = require('mongoose');
+var app  = express();
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
+var test = require('./test/testdb');
+var ModelSchemas = require('./db/modelschemas');
 
-var app = express();
+var uri = "mongodb://127.0.0.1:27017/BPMtest";
+//global.db = (global.db ? global.db : mongoose.conn);
+mongoose.connect(uri);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,6 +33,7 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(test);
 app.use(routes);
 app.use(users);
 app.use(login);
