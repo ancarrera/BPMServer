@@ -10,15 +10,15 @@ var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var app  = express();
 
+var uri = "mongodb://127.0.0.1:27017/BPMtest";
+global.db = mongoose.connect(uri);
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
 var test = require('./test/testdb');
 var ModelSchemas = require('./db/modelschemas');
 
-var uri = "mongodb://127.0.0.1:27017/BPMtest";
-//global.db = (global.db ? global.db : mongoose.conn);
-mongoose.connect(uri);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

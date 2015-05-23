@@ -4,7 +4,18 @@ block content
    div.container(style='text-align: center')
       div.row
          div.span5.offset2
-         br
-         br
+             h1(style= 'marginBottom: 20px;') User with id #{user._id}
+             br
+             br
+             ul(class="list-group")
+                 li(class="list-group-item") #[b Name:] #{user.name}
+                 li(class="list-group-item") #[b First surname:] #{user.firstsurname}
+                 li(class="list-group-item") #[b Second surname:] #{user.secondsurname}
+                 li(class="list-group-item") #[b Age:] #{user.age}
+                 li(class="list-group-item") #[b City:] #{user.city}
+                 li(class="list-group-item") #[b Country:] #{user.country}
+                 li(class="list-group-item") #[b Administration:] #{user.administration}
+                 li(class="list-group-item") #[b Measurements insertions:] #{user.totalinsertions}
+
          
 
