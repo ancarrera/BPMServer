@@ -189,7 +189,7 @@ router.delete('/users/:id/delete', function (req,res,next) {
                     case 'json':
                         if(!err && user != null){
                             user.remove();
-                            res.json({"status":200,"des":"Usser deleted"});
+                            res.json({"status":200,"des":"User deleted"});
                         }else{
                             res.status(404);
                             var error = {"status":404,"des":"User not found"};
@@ -264,7 +264,7 @@ function createNewUser(req){
     user.name = req.body.name;
     user.email = req.body.email;
     user.firstsurname = req.body.firstsurname;
-    user.secondsurname = req.body.secondsurname
+    user.secondsurname = req.body.secondsurname;
     user.age = req.body.age;
     user.city = req.body.city;
     user.administration = req.body.administration;
