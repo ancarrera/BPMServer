@@ -3,7 +3,7 @@ extends layout
 
 block content
    div.container(style='text-align: center')
-      h1 Register
+      h1 Edit User
       form.form-signin(action="/users/create", method="post")
          input.input-block-level(type="hidden", name="_method",value="put")
          p E-mail
@@ -25,4 +25,5 @@ block content
          p Country
          input.input-block-level(type="text", name="country",value="#{user.country}",required=true)
          p
-         button.btn.btn-large.btn-primary(type="submit") Sign in
+         button.btn.btn-large.btn-primary(type="submit") Update
+         a.btn.btn-large.btn-primary(href="/") Home

@@ -114,7 +114,7 @@ router.put('/users/:id',function(req,res,next){
         if(checkedParams == ''){
 
             var user = createNewUser(req);
-
+            user._id = req.params.id;
             switch (accept.type(['html','json'])){
 
                 case 'html':
@@ -188,7 +188,8 @@ router.delete('/users/:id/delete', function (req,res,next) {
                         break;
                     case 'json':
                         if(!err && user != null){
-                            res.json(user);
+                            user.remove();
+                            res.json({"status":200,"des":"Usser deleted"});
                         }else{
                             res.status(404);
                             var error = {"status":404,"des":"User not found"};
