@@ -1,0 +1,27 @@
+//Created by adrian on 24/5/15.
+extends layout
+
+block content
+   div.container(style='text-align: center')
+      h1 Register
+      form.form-signin(action="/users/create", method="post")
+         p E-mail
+         input.input-block-level(type="email", name="email",required=true)
+         p Password
+         input.input-block-level(type="password", name="password",required=true)
+         p Name
+         input.input-block-level(type="text", name="name",required=true)
+         p First surname
+         input.input-block-level(type="text", name="firstsurname",required=true)
+         p Second surname
+         input.input-block-level(type="text", name="secondsurname",required=true)
+         p Age
+         input.input-block-level(type="number", name="age",required=true)
+         p City
+         input.input-block-level(type="text", name="city",required=true)
+         p Administration
+         input.input-block-level(type="text", name="administration",required=true)
+         p Country
+         input.input-block-level(type="text", name="country",required=true)
+         p
+         button.btn.btn-large.btn-primary(type="submit") Sign in

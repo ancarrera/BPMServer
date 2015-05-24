@@ -15,6 +15,7 @@ var MeasuremetsSchema = new Schema({
 var UserSchema = new Schema({
 
     'name':{type:String,default:""},
+    'email':{type:String,default:""},
     'firstsurname':{ type:String,default:""},
     'secondsurname':{ type:String,default:""},
     'age':{ type:String,default:""},

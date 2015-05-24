@@ -7,8 +7,8 @@ var router = new express.Router();
 router.get('/login',function(req,res,next){
 
     if(req.accepts('html')){
-        res.render('login', { title: 'Login',header1:'Introduce el usuario (formato e-mail)',
-            header2:'Introduce la contraseña'});
+        res.render('login', { title: 'Login',header1:'Enter your username (register e-mail)',
+            header2:'Enter your password'});
     }
 
 });

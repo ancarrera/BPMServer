@@ -35,12 +35,14 @@ router.get('/test/save/measurements',function(req,res,next){
     res.end();
 });
 
-var clear = function clear(req,res,next){
+var clear = function(){
     global.db.dropDatabase();
-    res.end();
+    return function(req,res,next){
+        res.end();
+    }
 }
 
-router.get('test/clear',clear);
+router.get('/test/clear',clear);
 
 function createFakeUser(){
     var user = new User;

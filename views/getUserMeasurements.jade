@@ -1,0 +1,11 @@
+//Created by adrian on 24/5/15.
+extends layout
+block content
+   div.container(style='text-align: center')
+      div.row
+         div.span5.offset2
+            h1(style= 'marginBottom: 20px;') User with id #{user._id}
+            br
+            br
+            ul(class="list-group")
+               li(class="list-group-item") #[b Name:] #{user.name}
