@@ -64,6 +64,40 @@ function createFakeMeasurement(){
     return measurement;
 }
 
+router.get('/users/:id/measurements',function (req,res,next){
+
+    var measurement = new Measurement;
+    measurement.systolic = "137"
+    measurement.diastolic = "90"
+    measurement.pulse = "70"
+    measurement.date = "25-05-15";
+    measurement.save(function(err){
+
+            if(!err){
+                User.findByIdAndUpdate(
+                    req.params.id,
+                    { $push: {"measurements": measurement}},
+                    {  safe: true, upsert: true},
+                    function(err, model) {
+                        if(err){
+                            console.log(err);
+                            return res.send(err);
+                        }else{
+                            var measuremetns = model.measurements;
+                            return res.render('getUserMeasurements',{'user':model});
+                        }
+                        //return res.json(model);
+
+                    });
+            }
+
+        }
+
+    )
+
+
+});
+
 
 
 module.exports = router;

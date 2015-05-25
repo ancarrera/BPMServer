@@ -17,6 +17,8 @@ block content
                  li(class="list-group-item") #[b Country:] #{user.country}
                  li(class="list-group-item") #[b Administration:] #{user.administration}
                  li(class="list-group-item") #[b Measurements insertions:] #{user.totalinsertions}
-
-             a.btn.btn-primary.btn-large(style='margin-top:40px;',href='/users/#{user._id}/delete') Delete user
+             form(method="post",action='/users/#{user._id}')
+                 input(type='hidden',name='_method',value='delete')
+                 a.btn.btn-primary.btn-large(type='submit',style='margin-top:40px;',href='/users/#{user._id}') Delete user
              a.btn.btn-primary.btn-large(style='margin-top:40px;margin-left:20px;',href='/users/#{user._id}/edit') Edit user
+             a.btn.btn-primary.btn-large(style='margin-top:40px;margin-left:20px;',href='/users/#{user._id}/measurements') Edit user

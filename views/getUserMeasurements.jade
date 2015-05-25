@@ -4,8 +4,23 @@ block content
    div.container(style='text-align: center')
       div.row
          div.span5.offset2
-            h1(style= 'marginBottom: 20px;') User with id #{user._id}
+            h1(style= 'marginBottom: 20px;') Measurements of #{user.name} #{user.firstsurname} #{user.secondsurname}
             br
             br
-            ul(class="list-group")
-               li(class="list-group-item") #[b Name:] #{user.name}
+            table.table.table-striped
+               thead
+                  tr
+                     th(style='text-align: center;',class="col-md-1") Date
+                     th(style='text-align: center;',class="col-md-1") Systolic Pressure
+                     th(style='text-align: center;',class="col-md-1") Diastolic Pressure
+                     th(style='text-align: center;',class="col-md-1") Pulse
+               tbody
+                  each val in user.measurements
+                     tr
+                        td #{val.date}
+                        td #{val.systolic}
+                        td #{val.diastolic}
+                        td #{val.pulse}
+
+            a.btn.btn-primary.btn-large(style='margin-top:40px',href='/users/#{user._id}') Atrás
+            form(method='post',action='/users/#{user._id}/measurements')

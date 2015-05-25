@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var _ = require('underscore');
-var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var app  = express();
 
@@ -20,8 +19,6 @@ var test = require('./test/testdb');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(methodOverride(function(req, res){
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
         var method = req.body._method;

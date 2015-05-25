@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var accepts = require('accepts');
+var md5 = require('md5');
+var auth = require('../security/auth');
 
 var bpmModel = require('../db/modelschemas');
 var User = bpmModel.User;
@@ -18,12 +20,9 @@ router.get('/users/create',function(req,res,next){
         res.status(406);
         res.send('Not acceptable');
     }
-
-
 });
 
 router.post('/users/create',function(req,res,next){
-
 
     var accept = accepts(req);
     if(req.accepts('json')=='json' || req.accepts('html')=='html'){
@@ -44,7 +43,7 @@ router.post('/users/create',function(req,res,next){
                             res.send('<h1>Error 500</h1> <p>User can not be registered</p>');
                         }else{
                             res.status(200);
-                            res.render("home",{'user':user});
+                            res.redirect('/users/'+user._id);
                         }
 
                     });
@@ -84,18 +83,20 @@ router.post('/users/create',function(req,res,next){
         res.status(406);
         res.send('Not acceptable');
     }
-
-
 });
 
 router.get('/users/:id/edit',function(req,res,next){
 
-    if(req.accepts('html')=='html'){
-        res.status(200);
-        User.findOne({'_id':req.params.id},function(err,user){
-            res.render('edituser',{'user':user});
-        });
-
+    if(req.accepts('html')=='html') {
+        if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+            res.status(200);
+            User.findOne({'_id': req.params.id}, function (err, user) {
+                user.password = md5(user.password);
+                res.render('edituser', {'user': user});
+            });
+        }else{
+            res.redirect('/login');
+        }
     }else{
         res.header({'Content-Type':'text/plain'});
         res.status(406);
@@ -118,18 +119,21 @@ router.put('/users/:id',function(req,res,next){
             switch (accept.type(['html','json'])){
 
                 case 'html':
+                    if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                        user.update(function (err) {
 
-                    user.update(function(err){
+                            if (err) {
+                                res.status(500);
+                                res.send('<h1>Error 500</h1> <p>User can not be edited</p>');
+                            } else {
+                                res.status(200);
+                                res.redirect('/users/' + user._id);
+                            }
 
-                        if(err){
-                            res.status(500);
-                            res.send('<h1>Error 500</h1> <p>User can not be edited</p>');
-                        }else{
-                            res.status(200);
-                            res.redirect('/users/'+user._id);
-                        }
-
-                    });
+                        });
+                    }else{
+                        res.redirect('/login');
+                    }
                     break;
                 case 'json':
                     user.update(function(err){
@@ -170,7 +174,7 @@ router.put('/users/:id',function(req,res,next){
 
 });
 
-router.delete('/users/:id/delete', function (req,res,next) {
+router.delete('/users/:id', function (req,res,next) {
         var accept = accepts(req);
         if(req.accepts('json')=='json'  || req.accepts('html')=='html'){
             User.findOne({'_id':req.params.id},function(err,user){
@@ -178,12 +182,16 @@ router.delete('/users/:id/delete', function (req,res,next) {
                 switch (accept.type(['html','json'])){
 
                     case 'html':
-                        if(!err && user != null){
-                           user.remove();
-                           res.redirect('/login')
+                        if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                            if (!err && user != null) {
+                                user.remove();
+                                res.redirect('/login')
+                            } else {
+                                res.status(404);
+                                res.send('<h1>Error 404</h1> <p>User not found</p>');
+                            }
                         }else{
-                            res.status(404);
-                            res.send('<h1>Error 404</h1> <p>User not found</p>');
+                            res.redirect('/login');
                         }
                         break;
                     case 'json':
@@ -200,7 +208,7 @@ router.delete('/users/:id/delete', function (req,res,next) {
             });
 
         }else{
-            res.header({'Content-Type':'text/plain'})
+            res.header({'Content-Type':'text/plain'});
             res.status(406);
             res.send('Not acceptable');
         }
@@ -215,11 +223,15 @@ router.get('/users/:id', function(req, res, next) {
             switch (accept.type(['html','json'])){
 
                 case 'html':
-                    if(!err && user != null){
-                        res.render('getuser', {'user': user});
+                    if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                        if (!err && user != null) {
+                            res.render('getuser', {'user': user});
+                        } else {
+                            res.status(404);
+                            res.send('<h1>Error 404</h1> <p>User not found</p>');
+                        }
                     }else{
-                        res.status(404);
-                        res.send('<h1>Error 404</h1> <p>User not found</p>');
+                        res.redirect('/login');
                     }
                     break;
                 case 'json':
@@ -235,7 +247,7 @@ router.get('/users/:id', function(req, res, next) {
         });
 
     }else{
-        res.header({'Content-Type':'text/plain'})
+        res.header({'Content-Type':'text/plain'});
         res.status(406);
         res.send('Not acceptable');
     }
@@ -269,7 +281,7 @@ function createNewUser(req){
     user.city = req.body.city;
     user.administration = req.body.administration;
     user.country = req.body.country;
-    user.password = req.body.password;
+    user.password = md5(req.body.password);
     return user;
 }
 
