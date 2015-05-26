@@ -1,0 +1,153 @@
+var express = require('express');
+var router  = express.Router();
+var bpmModel = require('../db/modelschemas');
+var accepts = require('accepts');
+var auth = require('../security/auth');
+var dateformat = require('dateformat');
+
+var User = bpmModel.User;
+var Measurement = bpmModel.Measurement;
+
+var DIANA_SYSTOLIC_LIMIT=170;
+var DIANA_DIASTOLIC_LIMIT=110;
+var REST_DIANA_LIMIT = 20;
+
+
+router.get('/users/:id/measurements',function (req,res,next) {
+
+        var accept = accepts(req);
+        if (req.accepts('json') == 'json' || req.accepts('html') == 'html') {
+            switch (accept.type(['html', 'json'])) {
+                case 'html':
+                    if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                        User.findById(
+                            req.params.id,
+                            function (err, user) {
+                                if (err) {
+                                    res.status(404);
+                                    res.send('<h1>Error 404</h1> <p>Obtaining user info<</p> ');
+                                } else {
+                                    res.render('getUserMeasurements', {'user': user});
+                                }
+
+                            });
+                    } else {
+                        res.redirect('/login');
+                    }
+                    break;
+                case 'json':
+                    User.findById(
+                        req.params.id,
+                        function (err, user) {
+                            if (err) {
+                                res.status(404);
+                                var error = {"status": 404, "des": "Error obtaining measurements"};
+                                res.json(error);
+                            } else {
+                                res.json(user.measurements);
+                            }
+
+                        });
+                    break;
+            }
+
+
+        } else {
+            res.header({'Content-Type': 'text/plain'});
+            res.status(406);
+            res.send('Not acceptable');
+        }
+    });
+
+router.get('/users/:id/measurements/add',function (req,res,next) {
+
+    if(req.accepts('html') == 'html') {
+       if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+        res.render('addmeasurement',{'user_id':req.params.id});
+       }else{
+           res.redirect('/login');
+       }
+    }else{
+        res.header({'Content-Type': 'text/plain'});
+        res.status(406);
+        res.send('Not acceptable');
+    }
+
+});
+
+router.post('/users/:id/measurements',function (req,res,next) {
+
+    var accept = accepts(req);
+    if (req.accepts('json') == 'json' || req.accepts('html') == 'html') {
+        var measurement = createMeasurement(req);
+        switch (accept.type(['html', 'json'])) {
+            case 'html':
+                if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                    measurement.save(function (err) {
+                        if (!err) {
+                            User.findByIdAndUpdate(
+                                req.params.id,
+                                {$push: {"measurements": measurement}},
+                                {safe: true, upsert: true},
+                                function (err, user) {
+                                    if (err) {
+                                        res.status(500);
+                                        return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
+                                    } else {
+                                        return res.redirect('/users/'+req.params.id+'/measurements')
+                                    }
+                                });
+                        } else {
+                            res.status(404);
+                            return res.send('<h1>Error 404</h1> <p>User not found</p> ');
+                        }
+                    });
+                } else {
+                    res.redirect('/login');
+                }
+                break;
+            case 'json':
+                measurement.save(function (err) {
+
+                    if (!err) {
+                        User.findByIdAndUpdate(
+                            req.params.id,
+                            {$push: {"measurements": measurement}},
+                            {safe: true, upsert: true},
+                            function (err, user) {
+                                if (err) {
+                                    res.status(500);
+                                    var error = {"status": 500, "des": "Error adding measurement"};
+                                    res.json(error);
+                                } else {
+                                    res.render('getUserMeasurements', {'measurement': measurement});
+                                }
+                            });
+                    } else {
+                        res.status(404);
+                        var error = {"status": 404, "des": "User not found"};
+                        res.json(error);
+                    }
+                });
+                break;
+        }
+    } else {
+        res.header({'Content-Type': 'text/plain'});
+        res.status(406);
+        res.send('Not acceptable');
+    }
+
+
+});
+
+function createMeasurement(req){
+
+    var measurement = new Measurement;
+    measurement.date = dateformat(new Date(), "dd-mm-yyyy");
+    measurement.systolic = req.body.systolic + "";
+    measurement.diastolic = req.body.diastolic + "";
+    measurement.pulse = req.body.pulse+"";
+    return measurement;
+}
+
+module.exports  =router;

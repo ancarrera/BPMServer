@@ -91,7 +91,6 @@ router.get('/users/:id/edit',function(req,res,next){
         if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
             res.status(200);
             User.findOne({'_id': req.params.id}, function (err, user) {
-                user.password = md5(user.password);
                 res.render('edituser', {'user': user});
             });
         }else{
@@ -120,7 +119,7 @@ router.put('/users/:id',function(req,res,next){
 
                 case 'html':
                     if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
-                        User.findOneAndUpdate({'_id':req.params.id},user,function(err,_user) {
+                        User.findOneAndUpdate({'_id':req.params.id},createSetObj(user),function(err,_user) {
 
                                 if (err) {
                                     res.status(500);
@@ -136,7 +135,7 @@ router.put('/users/:id',function(req,res,next){
                     }
                     break;
                 case 'json':
-                    user.update(function(err){
+                    User.findOneAndUpdate({'_id':req.params.id},createSetObj(user),function(err,_user) {
 
                         if(err){
                             res.status(500);
@@ -146,6 +145,7 @@ router.put('/users/:id',function(req,res,next){
                             res.status(200);
                             res.json(user);
                         }
+
 
                     });
                     break;
@@ -283,6 +283,14 @@ function createNewUser(req){
     user.country = req.body.country;
     user.password = req.body.password;
     return user;
+}
+
+function createSetObj(user){
+
+
+    return {$set: { name: user.name, firstsurname: user.firstsurname, secondsurname: user.secondsurname, email:user.email,
+    age:user.age,city:user.city, administration:user.administration,country:user.country,password:user.password}};
+
 }
 
 module.exports = router;

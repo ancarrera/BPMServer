@@ -1,0 +1,33 @@
+//
+   Created by adrian on 26/5/15.
+
+extends layout
+
+block navbar
+   a.navbar-brand(href="/") BPM Server
+block content
+   div.container(style='text-align: center')
+      div.column
+         div.span5.offset2
+         br
+         br
+         form.form-vertical(action='/users/#{user_id}/measurements', method='post')
+            fieldset
+               legend(class='logintitle') ADD MEASUREMENT
+               div.control-group
+                  label.control-label(for='inputSystolic') Systolic Pressure
+                  div.controls
+                     input#inputSystolic.input-large(style='margin-top: 10px;margin-bottom: 10px',name='systolic', type='number', min=50,max=220 placeholder='Systolic pressure',value=110, required)
+               div.control-group
+                  label.control-label(for='inputDiastolic') Diastolic Pressure
+                  div.controls
+                     input#inputDiastolic.input-large(style='margin-top: 10px;margin-bottom: 10px', name='diastolic', type='number',min=40,max=180, placeholder='Diastolic pressure',value=70, required)
+               div.control-group
+                  label.control-label(for='inputPulse') Pulse
+                  div.controls
+                     input#inputPulse.input-large(style='margin-top: 10px;',name="pulse",type='number',placeholder='Pulse',min=40,max=200,value=60)
+
+            input#inputSubmit.input-large(class='btn btn-primary',style='margin-top: 20px;',type='submit',value='Add')
+         p
+         a.btn.btn-primary(style='margin-top:20px',href="/users/#{user_id}/measurements") Back
+

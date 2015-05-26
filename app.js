@@ -15,6 +15,7 @@ global.db = mongoose.connect(uri);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
+var usermeasurements = require('./routes/usermeasurements');
 var test = require('./test/testdb');
 
 app.set('views', path.join(__dirname, 'views'));
@@ -38,6 +39,7 @@ app.use(test);
 app.use(routes);
 app.use(users);
 app.use(login);
+app.use(usermeasurements);
 
 app.listen("8080");
 
