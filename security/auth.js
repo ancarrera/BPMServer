@@ -4,9 +4,15 @@
 
 var md5 = require('MD5');
 
+var cookieName = 'usersessionexpressserver';
+
 exports.createUserCookie = function(res,serializedUser){
 
-    res.cookie('usersessionexpressserver',serializedUser,{ expires: new Date(Date.now() + 1000 * 60 * 3), httpOnly: true });
+    res.cookie(cookieName,serializedUser,{ expires: new Date(Date.now() + 1000 * 60 * 3), httpOnly: true });
+}
+
+exports.destroyUserCookie = function (res){
+   res.clearCookie(cookieName);
 }
 
 exports.checkIfUserHasAsignedCookie = function (req,userId) {
@@ -23,9 +29,12 @@ exports.checkIfUserHasAsignedCookie = function (req,userId) {
 
 exports.isCorrectPassword= function(requestPassword,user){
 
-    if(requestPassword == md5(user.password)){
-        return true;
+    if(user != null){
+        if(requestPassword == user.password){
+            return true;
+        }
     }
+
     return false;
 }
 

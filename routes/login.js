@@ -4,6 +4,9 @@
 var express = require('express');
 var router = new express.Router();
 var auth = require('../security/auth');
+var accepts = require('accepts');
+var bpmModel = require('../db/modelschemas');
+var User = bpmModel.User;
 
 router.get('/login',function(req,res,next){
 
@@ -17,7 +20,6 @@ router.get('/login',function(req,res,next){
 router.post('/login',function(req,res,next){
     var accept = accepts(req);
     if(req.accepts('json')=='json' || req.accepts('html')=='html'){
-
 
         switch (accept.type(['html','json'])){
 
@@ -51,4 +53,16 @@ router.post('/login',function(req,res,next){
 
 });
 
-module.exports = router
+router.get('/logout',function(req,res,next){
+
+    if(req.accepts('html')=='html'){
+        auth.destroyUserCookie(res);
+        res.redirect('/login')
+
+    }else{
+        res.end();
+    }
+
+});
+
+module.exports = router;

@@ -1,5 +1,10 @@
 extends layout
-
+block navbar
+  a.navbar-brand(href="/") BPM Server
+  div(class="collapse navbar-collapse")
+    ul(class="nav navbar-nav")
+      li
+        a(href="/login") Login
 block content
   .conatainer
     nav.jumbotron

@@ -120,15 +120,15 @@ router.put('/users/:id',function(req,res,next){
 
                 case 'html':
                     if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
-                        user.update(function (err) {
+                        User.findOneAndUpdate({'_id':req.params.id},user,function(err,_user) {
 
-                            if (err) {
-                                res.status(500);
-                                res.send('<h1>Error 500</h1> <p>User can not be edited</p>');
-                            } else {
-                                res.status(200);
-                                res.redirect('/users/' + user._id);
-                            }
+                                if (err) {
+                                    res.status(500);
+                                    res.send('<h1>Error 500</h1> <p>User can not be edited</p>');
+                                } else {
+                                    res.status(200);
+                                    res.redirect('/users/' + _user._id);
+                                }
 
                         });
                     }else{
@@ -185,7 +185,7 @@ router.delete('/users/:id', function (req,res,next) {
                         if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
                             if (!err && user != null) {
                                 user.remove();
-                                res.redirect('/login')
+                                res.redirect('/logout')
                             } else {
                                 res.status(404);
                                 res.send('<h1>Error 404</h1> <p>User not found</p>');
@@ -281,7 +281,7 @@ function createNewUser(req){
     user.city = req.body.city;
     user.administration = req.body.administration;
     user.country = req.body.country;
-    user.password = md5(req.body.password);
+    user.password = req.body.password;
     return user;
 }
 

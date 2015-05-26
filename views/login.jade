@@ -1,26 +1,29 @@
 //Created by Adrian on 21/5/15.
 extends layout
 
+block navbar
+   a.navbar-brand(href="/") BPM Server
+
 block content
    div.container(style='text-align: center')
       div.row
          div.span5.offset2
          br
          br
-         form.form-horizontal(action='/login', method='post')
+         form.form-vertical(action='/login', method='post')
             fieldset
                legend(class='logintitle') LOGIN
                div.control-group
                   label.control-label(for='inputUserName') #{header1}
                   div.controls
-                     input#inputUserName.input-large(class='username',style='margin-top: 15px',name='username', type='text', placeholder='E-Mail', required)
+                     input#inputEmail.input-large(class='username',style='margin-top: 15px',name='email', type='text', placeholder='E-Mail', required)
                div.control-group
                   label.control-label(for='inputPassword') #{header2}
                   div.controls
                      input#inputPassword.input-large(style='margin-top: 15px', name='password', type='password', placeholder='Password', required)
                div.control-group
                   div.controls
-         button.btn.btn-primary(style='margin-top: 20px',type='submit') Login
+                     input#inputSubmit.input-large(class='btn btn-primary',style='margin-top: 20px;',type='submit',value='Login')
          p
          a.btn.btn-primary(style='margin-top:20px',href="/users/create") Register
 
