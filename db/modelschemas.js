@@ -20,6 +20,7 @@ var UserSchema = new Schema({
     'secondsurname':{ type:String,default:""},
     'age':{ type:String,default:""},
     'city':{ type:String,default:""},
+    'gcmToken':{type:String,default:""},
     'administration':{ type:String,default:""},
     'country':{ type:String,default:""},
     'password':{ type:String,default:""},

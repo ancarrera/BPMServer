@@ -19,6 +19,7 @@
     "mongoose": "^4.0.3",
     "mongoose-auto-increment": "^4.0.0",
     "morgan": "~1.5.1",
+    "node-gcm": "^0.9.15",
     "serve-favicon": "~2.2.0",
     "underscore": "^1.8.3"
   },

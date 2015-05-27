@@ -135,20 +135,25 @@ router.put('/users/:id',function(req,res,next){
                     }
                     break;
                 case 'json':
-                    User.findOneAndUpdate({'_id':req.params.id},createSetObj(user),function(err,_user) {
-                        if
-                        if(err){
-                            res.status(500);
-                            var error = {"status":500,"des":"User can not be edited"};
-                            res.json(error);
-                        }else{
-                            res.status(200);
-                            //user.password = md5(user.password);
-                            res.json(user);
-                        }
+                    if(req.headers['access-token']!= undefined
+                        && req.headers['access-token'] == md5(user.password)) {
+                        User.findOneAndUpdate({'_id': req.params.id}, createSetObj(user), function (err, _user) {
+                            if (err) {
+                                res.status(500);
+                                var error = {"status": 500, "des": "User can not be edited"};
+                                res.json(error);
+                            } else {
+                                res.status(200);
+                                //user.password = md5(user.password);
+                                res.json(user);
+                            }
 
 
-                    });
+                        });
+                    }else{
+                        res.status(400);
+                        res.json({'status':400,'des':'Missing token in request'});
+                    }
                     break;
             }
         }else{
@@ -196,15 +201,22 @@ router.delete('/users/:id', function (req,res,next) {
                         }
                         break;
                     case 'json':
-                        if(!err && user != null){
-                            user.remove();
-                            res.json({"status":200,"des":"User deleted"});
+                        if(req.headers['access-token']!= undefined
+                            && req.headers['access-token'] == md5(user.password)) {
+
+                            if (!err && user != null) {
+                                user.remove();
+                                res.json({"status": 200, "des": "User deleted"});
+                            } else {
+                                res.status(404);
+                                var error = {"status": 404, "des": "User not found"};
+                                res.json(error);
+                            }
                         }else{
-                            res.status(404);
-                            var error = {"status":404,"des":"User not found"};
-                            res.json(error);
+                                res.status(400);
+                                res.json({'status':400,'des':'Missing token in request'});
                         }
-                        break;
+                            break;
                 }
             });
 

@@ -4,13 +4,10 @@ var bpmModel = require('../db/modelschemas');
 var accepts = require('accepts');
 var auth = require('../security/auth');
 var dateformat = require('dateformat');
+var GoogleCloudMessaging = require('../gcm/gcmNotifications');
 
 var User = bpmModel.User;
 var Measurement = bpmModel.Measurement;
-
-var DIANA_SYSTOLIC_LIMIT=170;
-var DIANA_DIASTOLIC_LIMIT=110;
-var REST_DIANA_LIMIT = 20;
 
 
 router.get('/users/:id/measurements',function (req,res,next) {
@@ -38,16 +35,22 @@ router.get('/users/:id/measurements',function (req,res,next) {
                 case 'json':
                     User.findById(
                         req.params.id,
-                        function (err, user) {
-                            if (err) {
-                                res.status(404);
-                                var error = {"status": 404, "des": "Error obtaining measurements"};
-                                res.json(error);
-                            } else {
-                                res.json(user.measurements);
+                            function (err, user) {
+                                if (req.headers['access-token'] != undefined
+                                    && req.headers['access-token'] == md5(user.password)) {
+                                    if (err) {
+                                        res.status(404);
+                                        var error = {"status": 404, "des": "Error obtaining measurements"};
+                                        res.json(error);
+                                    } else {
+                                        res.json(user.measurements);
+                                    }
+                                } else {
+                                    res.status(400);
+                                    res.json({'status': 400, 'des': 'Missing token in request'});
+                                }
                             }
-
-                        });
+                    );
                     break;
             }
 
@@ -87,15 +90,17 @@ router.post('/users/:id/measurements',function (req,res,next) {
                         if (!err) {
                             User.findByIdAndUpdate(
                                 req.params.id,
-                                {$push: {"measurements": measurement}},
+                                {$push: {"measurements": measurement},$inc: {"totalinsertions": 1}},
                                 {safe: true, upsert: true},
                                 function (err, user) {
-                                    if (err) {
-                                        res.status(500);
-                                        return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
-                                    } else {
-                                        return res.redirect('/users/'+req.params.id+'/measurements')
-                                    }
+                                        if (err) {
+                                            res.status(500);
+                                            return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
+                                        } else {
+                                            GoogleCloudMessaging.sendMobileNotification(user);
+                                            return res.redirect('/users/' + req.params.id + '/measurements')
+                                        }
+
                                 });
                         } else {
                             res.status(404);
@@ -115,12 +120,18 @@ router.post('/users/:id/measurements',function (req,res,next) {
                             {$push: {"measurements": measurement}},
                             {safe: true, upsert: true},
                             function (err, user) {
-                                if (err) {
-                                    res.status(500);
-                                    var error = {"status": 500, "des": "Error adding measurement"};
-                                    res.json(error);
-                                } else {
-                                    res.render('getUserMeasurements', {'measurement': measurement});
+                                if (req.headers['access-token'] != undefined
+                                    && req.headers['access-token'] == md5(user.password)) {
+                                    if (err) {
+                                        res.status(500);
+                                        var error = {"status": 500, "des": "Error adding measurement"};
+                                        res.json(error);
+                                    } else {
+                                        res.render('getUserMeasurements', {'measurement': measurement});
+                                    }
+                                }else{
+                                    res.status(400);
+                                    res.json({'status': 400, 'des': 'Missing token in request'});
                                 }
                             });
                     } else {
