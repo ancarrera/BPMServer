@@ -143,6 +143,7 @@ router.put('/users/:id',function(req,res,next){
                             res.json(error);
                         }else{
                             res.status(200);
+                            //user.password = md5(user.password);
                             res.json(user);
                         }
 
@@ -235,14 +236,22 @@ router.get('/users/:id', function(req, res, next) {
                     }
                     break;
                 case 'json':
-                    if(!err && user != null){
-                        res.json(user);
+                    if(req.headers['access-token']!= undefined
+                        && req.headers['access-token'] == md5(user.password)){
+
+                        if(!err && user != null){
+                            res.json(user);
+                        }else{
+                            res.status(404);
+                            var error = {"status":404,"des":"User not found"};
+                            res.json(error);
+                        }
                     }else{
-                        res.status(404);
-                        var error = {"status":404,"des":"User not found"};
-                        res.json(error);
+                        res.status(400);
+                        res.json({'status':400,'des':'Missing token in request'});
                     }
                     break;
+
             }
         });
 
