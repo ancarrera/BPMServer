@@ -136,7 +136,7 @@ router.put('/users/:id',function(req,res,next){
                     break;
                 case 'json':
                     User.findOneAndUpdate({'_id':req.params.id},createSetObj(user),function(err,_user) {
-
+                        if
                         if(err){
                             res.status(500);
                             var error = {"status":500,"des":"User can not be edited"};
