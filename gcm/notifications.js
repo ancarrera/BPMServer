@@ -3,7 +3,6 @@
  */
 var gcm = require('node-gcm');
 var message = new gcm.Message();
-var U
 
 var API_KEY = 'AIzaSyAumnnNg2xWUHqI2l7qUkyeHmoCjqpheHE';
 var testRegId = 'APA91bEmT3cFVrblef93mZoOf0K_bvokxRIhDzlqbYw1Bk2MHbLePE77VPoE3bc5KrHlGHcUEX_KhA7Fk2bQEC4-N38Zw0GRMRhlxHtg_PxaWzU8zoL-tYWrFDy-9CK2I0uZto1j61RKwvQCvpbEKhIcRTLhr233wJ96ezaTvRa51Ezk85J2m94';
@@ -13,10 +12,10 @@ var DIANA_DIASTOLIC_LIMIT=110;
 var REST_DIANA_LIMIT = 20;
 
 function isCorrectPostForNotification(user){
-    //if (user.getTotalinsertions() % 5 == 0){
-    //    return true;
-    //}
-    return true;
+    if (user.totalinsertions % 5 == 0){
+        return true;
+    }
+    return false;
 }
 
 function calculatePatientStatus(average){
@@ -99,11 +98,10 @@ function calculateAverages(measurements){
 
 function checkIfUserHasGCMRegid(user){
 
-    //if(user.gcmToken != undefined && user.gcmToken != ''){
-    //    return true;
-    //}
-    return true;
-    //return false;
+    if(user.gcmToken != undefined && user.gcmToken != ''){
+        return true;
+    }
+    return false;
 }
 
 function sendMessage(statusNotification,user){
@@ -116,16 +114,35 @@ function sendMessage(statusNotification,user){
         else    console.log(result);
     });
 }
+function createNotificationMessage(user){
+
+    var fiveLastMeasures = getFiveLastMeasurements(user);
+    var average = calculateAverages(fiveLastMeasures);
+    var status = calculatePatientStatus(average);
+    var message = prepareMessage(status,'es');
+
+    return message;
+}
 
 exports.sendMobileNotification = function (user){
-    if (checkIfUserHasGCMRegid(user)){
-        if (isCorrectPostForNotification(user)){
-            var fiveLastMeasures = getFiveLastMeasurements(user);
-            var average = calculateAverages(fiveLastMeasures);
-            var status = calculatePatientStatus(average);
-            var message = prepareMessage(status,'es');
+    if (isCorrectPostForNotification(user)){
+        if (checkIfUserHasGCMRegid(user)){
+            var message = createNotificationMessage(user);
             sendMessage(message,user);
         }
+    }
+}
+
+exports.sendWebNotification = function (res,user){
+
+    if (isCorrectPostForNotification(user)){
+        var fiveLastMeasures = getFiveLastMeasurements(user);
+        var average = calculateAverages(fiveLastMeasures);
+        var status = calculatePatientStatus(average);
+        var message = prepareMessage(status,'en');
+        res.status(200);
+        return message;
+
     }
 }
 

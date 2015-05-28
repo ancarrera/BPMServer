@@ -8,6 +8,7 @@ var bpmModel = require('../db/modelschemas');
 var User = bpmModel.User;
 
 var userAttributes = ['email','name','firstsurname','secondsurname','age','city','administration','country','password'];
+var gcmAttributes = ['gcmToken'];
 
 
 router.get('/users/create',function(req,res,next){
@@ -267,6 +268,46 @@ router.get('/users/:id', function(req, res, next) {
             }
         });
 
+    }else{
+        res.header({'Content-Type':'text/plain'});
+        res.status(406);
+        res.send('Not acceptable');
+    }
+
+});
+
+router.put('/users/:id/gcmtoken/', function (req,res,next) {
+    if(req.accepts('html')=='html') {
+        var checkedParams = checkPostRequest(req,gcmAttributes);
+        if(checkedParams == ''){
+            if (req.headers['access-token'] != undefined
+                && req.headers['access-token'] == md5(user.password)) {
+
+                    User.findOneAndUpdate({'_id': req.params.id}, {$set: {'gcmToken': req.params.gcmToken}},
+                        {safe: true, upsert: true}, function (err, _user) {
+                            if (err) {
+                                res.status(500);
+                                var error = {"status": 500, "des": "User can not be edited"};
+                                res.json(error);
+                            } else {
+                                res.status(200);
+                                res.json(user);
+                            }
+                        });
+
+            } else {
+                res.status(400);
+                res.json({'status': 400, 'des': 'Missing token in request'});
+            }
+        }else {
+            res.status(400);
+            var error_json = {
+                "status": 400,
+                "des": "Bad request",
+                "missing_params": JSON.stringify(checkedParams.split(','))
+            };
+            res.json(error_json);
+        }
     }else{
         res.header({'Content-Type':'text/plain'});
         res.status(406);

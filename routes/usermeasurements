@@ -4,7 +4,7 @@ var bpmModel = require('../db/modelschemas');
 var accepts = require('accepts');
 var auth = require('../security/auth');
 var dateformat = require('dateformat');
-var GoogleCloudMessaging = require('../gcm/gcmNotifications');
+var Notification = require('../gcm/notifications');
 
 var User = bpmModel.User;
 var Measurement = bpmModel.Measurement;
@@ -97,8 +97,8 @@ router.post('/users/:id/measurements',function (req,res,next) {
                                             res.status(500);
                                             return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
                                         } else {
-                                            GoogleCloudMessaging.sendMobileNotification(user);
-                                            return res.redirect('/users/' + req.params.id + '/measurements')
+                                            var message = Notification.sendWebNotification(res,user);
+                                            res.render('notification',{'message':message, 'user':user });
                                         }
 
                                 });
@@ -113,7 +113,6 @@ router.post('/users/:id/measurements',function (req,res,next) {
                 break;
             case 'json':
                 measurement.save(function (err) {
-
                     if (!err) {
                         User.findByIdAndUpdate(
                             req.params.id,
@@ -127,6 +126,7 @@ router.post('/users/:id/measurements',function (req,res,next) {
                                         var error = {"status": 500, "des": "Error adding measurement"};
                                         res.json(error);
                                     } else {
+                                        Notification.sendMobileNotification(user);
                                         res.render('getUserMeasurements', {'measurement': measurement});
                                     }
                                 }else{
