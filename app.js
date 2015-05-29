@@ -4,7 +4,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
-var _ = require('underscore');
 var mongoose = require('mongoose');
 var app  = express();
 
@@ -40,5 +39,5 @@ app.use(users);
 app.use(login);
 app.use(usermeasurements);
 
-app.listen("8082");
+app.listen("8089");
 

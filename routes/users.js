@@ -117,8 +117,8 @@ router.put('/users/:id',function(req,res,next){
 
             var user = createNewUser(req);
             user._id = req.params.id;
-            switch (accept.type(['html','json'])){
 
+            switch (accept.type(['html','json'])){
                 case 'html':
                     if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
                         User.findOneAndUpdate({'_id':req.params.id},createSetObj(user),function(err,_user) {
@@ -137,25 +137,27 @@ router.put('/users/:id',function(req,res,next){
                     }
                     break;
                 case 'json':
-                    if(req.headers['access-token']!= undefined
-                        && req.headers['access-token'] == md5(user.password)) {
-                        User.findOneAndUpdate({'_id': req.params.id}, createSetObj(user), function (err, _user) {
-                            if (err) {
-                                res.status(500);
-                                var error = {"status": 500, "des": "User can not be edited"};
-                                res.json(error);
-                            } else {
-                                res.status(200);
-                                //user.password = md5(user.password);
-                                res.json(user);
-                            }
+                    User.findById({'_id':req.params.id}, function (err,olduser) { //recover olduser for checking token
+                        if(req.headers['access-token']!= undefined
+                            && req.headers['access-token'] == md5(olduser.password)) {
 
+                            User.findOneAndUpdate({'_id': req.params.id}, createSetObj(user), function (err,user) {
 
-                        });
-                    }else{
-                        res.status(400);
-                        res.json({'status':400,'des':'Missing token in request'});
-                    }
+                                if (err) {
+                                    res.status(500);
+                                    var error = {"status": 500, "des": "User can not be edited"};
+                                    res.json(error);
+                                } else {
+                                    res.status(200);
+                                    //user.password = md5(user.password);
+                                    res.json(user);
+                                }
+                            });
+                        }else{
+                            res.status(400);
+                            res.json({'status':400,'des':'Missing token in request'});
+                        }
+                    });
                     break;
             }
         }else{
@@ -254,6 +256,7 @@ router.get('/users/:id', function(req, res, next) {
                         && req.headers['access-token'] == md5(user.password)){
 
                         if(!err && user != null){
+                            user.password = md5(user.password);
                             res.json(user);
                         }else{
                             res.status(404);
