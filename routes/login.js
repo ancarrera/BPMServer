@@ -6,6 +6,7 @@ var router = new express.Router();
 var auth = require('../security/auth');
 var accepts = require('accepts');
 var bpmModel = require('../db/modelschemas');
+var md5 = require('MD5');
 var User = bpmModel.User;
 
 router.get('/login',function(req,res,next){
@@ -39,7 +40,7 @@ router.post('/login',function(req,res,next){
             case 'json':
                 User.findOne({'email':req.body.email},function(err,user){
                     user.password = md5(user.password);
-                    res.render('edituser',{'user':user});
+                    res.json(user);
                 });
                 break;
         }

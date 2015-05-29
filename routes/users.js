@@ -58,6 +58,7 @@ router.post('/users/create',function(req,res,next){
                             res.json(error);
                         }else{
                             res.status(200);
+                            user.password = md5(user.password);
                             res.json(user);
                         }
 
