@@ -2,9 +2,9 @@
  * Created by adrian on 25/5/15.
  */
 
-var md5 = require('MD5');
-
 var cookieName = 'usersessionexpressserver';
+var bpmModel = require('../db/modelschemas');
+var User = bpmModel.User;
 
 exports.createUserCookie = function(res,serializedUser){
 
@@ -36,6 +36,30 @@ exports.isCorrectPassword= function(requestPassword,user){
     }
 
     return false;
+}
+
+exports.checkPostRequest = function(req,objectmethods){
+
+    var params = '';
+    var first = true;
+
+    objectmethods.forEach(function(entry) {
+        if(typeof req.body[entry] === 'undefined'){
+            if(first){
+                first= false;
+                params += entry;
+            }else{
+                params +=','+entry;
+            }
+        }
+    });
+    return params;
+}
+
+//this methods allows get the password(token) before that update,
+exports.getTokenInUpdateMethods = function(user_id,callback){
+
+    User.findOne({ '_id': user_id }, 'password', callback);
 }
 
 

@@ -145,4 +145,3 @@ exports.sendWebNotification = function (res,user){
 
     }
 }
-

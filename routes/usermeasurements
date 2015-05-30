@@ -5,9 +5,12 @@ var accepts = require('accepts');
 var auth = require('../security/auth');
 var dateformat = require('dateformat');
 var Notification = require('../gcm/notifications');
+var md5 = require('MD5');
 
 var User = bpmModel.User;
 var Measurement = bpmModel.Measurement;
+
+var pAttributtes = ['systolic','diastolic','pulse'];
 
 
 router.get('/users/:id/measurements',function (req,res,next) {
@@ -81,67 +84,93 @@ router.get('/users/:id/measurements/add',function (req,res,next) {
 router.post('/users/:id/measurements',function (req,res,next) {
 
     var accept = accepts(req);
+
     if (req.accepts('json') == 'json' || req.accepts('html') == 'html') {
-        var measurement = createMeasurement(req);
-        switch (accept.type(['html', 'json'])) {
-            case 'html':
-                if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+        var checkedParams = auth.checkPostRequest(req,pAttributtes);
+        if(checkedParams == ''){
+            var measurement = createMeasurement(req);
+            switch (accept.type(['html', 'json'])) {
+                case 'html':
+                    if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
+                        measurement.save(function (err) {
+                            if (!err) {
+                                User.findByIdAndUpdate(
+                                    req.params.id,
+                                    {$push: {"measurements": measurement}, $inc: {"totalinsertions": 1}},
+                                    {safe: true, upsert: true},
+                                    function (oerr, olduser) {
+                                        User.findById({'_id': req.params.id}, function (nerr, newuser) {
+                                            if (oerr || nerr) {
+                                                res.status(500);
+                                                return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
+                                            } else {
+                                                var message = Notification.sendWebNotification(res, newuser);
+                                                res.render('notification', {'message': message, 'user': newuser});
+                                            }
+                                        });
+                                    });
+                            } else {
+                                res.status(404);
+                                return res.send('<h1>Error 404</h1> <p>User not found</p> ');
+                            }
+                        });
+                    } else {
+                        res.redirect('/login');
+                    }
+                    break;
+                case 'json':
                     measurement.save(function (err) {
                         if (!err) {
-                            User.findByIdAndUpdate(
-                                req.params.id,
-                                {$push: {"measurements": measurement},$inc: {"totalinsertions": 1}},
-                                {safe: true, upsert: true},
-                                function (err, user) {
-                                        if (err) {
-                                            res.status(500);
-                                            return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
-                                        } else {
-                                            var message = Notification.sendWebNotification(res,user);
-                                            res.render('notification',{'message':message, 'user':user });
-                                        }
-
-                                });
-                        } else {
-                            res.status(404);
-                            return res.send('<h1>Error 404</h1> <p>User not found</p> ');
-                        }
-                    });
-                } else {
-                    res.redirect('/login');
-                }
-                break;
-            case 'json':
-                measurement.save(function (err) {
-                    if (!err) {
-                        User.findByIdAndUpdate(
-                            req.params.id,
-                            {$push: {"measurements": measurement}},
-                            {safe: true, upsert: true},
-                            function (err, user) {
+                            auth.getTokenInUpdateMethods(req.params.id, function (terror, pass) {
                                 if (req.headers['access-token'] != undefined
-                                    && req.headers['access-token'] == md5(user.password)) {
-                                    if (err) {
-                                        res.status(500);
-                                        var error = {"status": 500, "des": "Error adding measurement"};
-                                        res.json(error);
-                                    } else {
-                                        Notification.sendMobileNotification(user);
-                                        res.render('getUserMeasurements', {'measurement': measurement});
-                                    }
-                                }else{
+                                    && req.headers['access-token'] == md5(pass.password)) {
+                                    User.findByIdAndUpdate(
+                                        req.params.id,
+                                        {$push: {"measurements": measurement}},
+                                        {safe: true, upsert: true},
+                                        function (oerr, user) {
+                                            User.findById({'_id': req.params.id}, function (nerr, newuser) {  //find the new user to return update
+                                                if (err) {
+                                                    res.status(500);
+                                                    var error = {"status": 500, "des": "Error adding measurement"};
+                                                    res.json(error);
+                                                } else {
+                                                    Notification.sendMobileNotification(user);
+                                                    res.json(measurement);
+                                                }
+                                            });
+                                    });
+                                } else {
                                     res.status(400);
-                                    res.json({'status': 400, 'des': 'Missing token in request'});
+                                    res.json({'status': 400, 'des': 'Missing token in request or incorrect'});
                                 }
                             });
-                    } else {
-                        res.status(404);
-                        var error = {"status": 404, "des": "User not found"};
-                        res.json(error);
-                    }
-                });
-                break;
-        }
+                        } else {
+                            res.status(404);
+                            var error = {"status": 404, "des": "User not found"};
+                            res.json(error);
+                        }
+                    });
+                    break;
+            }
+        }else
+            {
+                switch (accept.type(['html', 'json'])) {
+                    case 'html':
+                        res.status(400);
+                        res.send('<h1>Error 400: Bad request</h1><p>Missing params [' + checkedParams + ']</p>');
+                        break;
+                    case 'json':
+                        res.status(400);
+                        var error_json = {
+                            "status": 400,
+                            "des": "Bad request",
+                            "missing_params": JSON.stringify(checkedParams.split(','))
+                        };
+                        res.json(error_json);
+                        break;
+                }
+            }
     } else {
         res.header({'Content-Type': 'text/plain'});
         res.status(406);
@@ -162,3 +191,6 @@ function createMeasurement(req){
 }
 
 module.exports  = router;
+
+
+

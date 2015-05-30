@@ -28,7 +28,7 @@ router.post('/users/create',function(req,res,next){
     var accept = accepts(req);
     if(req.accepts('json')=='json' || req.accepts('html')=='html'){
 
-        var checkedParams = checkPostRequest(req,userAttributes);
+        var checkedParams = auth.checkPostRequest(req,userAttributes);
         if(checkedParams == ''){
 
             var user = createNewUser(req);
@@ -112,12 +112,11 @@ router.put('/users/:id',function(req,res,next){
     var accept = accepts(req);
     if(req.accepts('json')=='json' || req.accepts('html')=='html'){
 
-        var checkedParams = checkPostRequest(req,userAttributes);
+        var checkedParams = auth.checkPostRequest(req,userAttributes);
+        var user = createNewUser(req);
+        user._id = req.params.id;
+
         if(checkedParams == ''){
-
-            var user = createNewUser(req);
-            user._id = req.params.id;
-
             switch (accept.type(['html','json'])){
                 case 'html':
                     if (auth.checkIfUserHasAsignedCookie(req, req.params.id)) {
@@ -137,29 +136,33 @@ router.put('/users/:id',function(req,res,next){
                     }
                     break;
                 case 'json':
-                    User.findById({'_id':req.params.id}, function (err,olduser) { //recover olduser for checking token
-                        if(req.headers['access-token']!= undefined
-                            && req.headers['access-token'] == md5(olduser.password)) {
+                        auth.getTokenInUpdateMethods(req.params.id, function (terror,pass){
+                            if (req.headers['access-token'] != undefined
+                                && req.headers['access-token'] == md5(pass.password)) {
 
-                            User.findOneAndUpdate({'_id': req.params.id}, createSetObj(user), function (err,user) {
+                                User.findOneAndUpdate({'_id': req.params.id}, createSetObj(user), function(oerr) {
 
-                                if (err) {
-                                    res.status(500);
-                                    var error = {"status": 500, "des": "User can not be edited"};
-                                    res.json(error);
-                                } else {
-                                    res.status(200);
-                                    //user.password = md5(user.password);
-                                    res.json(user);
-                                }
-                            });
-                        }else{
-                            res.status(400);
-                            res.json({'status':400,'des':'Missing token in request'});
-                        }
-                    });
+                                    User.findById({'_id':req.params.id}, function (nerr,newuser) {  //find the new user to return update
+
+                                        if (nerr || oerr) {
+                                            res.status(500);
+                                            var error = {"status": 500, "des": "User can not be edited"};
+                                            res.json(error);
+                                        } else {
+                                            res.status(200);
+                                            newuser.password = md5(newuser.password);
+                                            res.json(newuser);
+                                        }
+                                    });
+                                });
+                            }else{
+                                res.status(400);
+                                res.json({'status':400,'des':'Missing token in request or incorrect'});
+                            }
+                        });
+
                     break;
-            }
+                }
         }else{
 
             switch (accept.type(['html','json'])){
@@ -205,21 +208,21 @@ router.delete('/users/:id', function (req,res,next) {
                         }
                         break;
                     case 'json':
-                        if(req.headers['access-token']!= undefined
-                            && req.headers['access-token'] == md5(user.password)) {
-
                             if (!err && user != null) {
-                                user.remove();
-                                res.json({"status": 200, "des": "User deleted"});
-                            } else {
+                                if(req.headers['access-token']!= undefined
+                                    && req.headers['access-token'] == md5(user.password)) {
+                                    user.remove();
+                                    res.status(200);
+                                    res.json({"status": 200, "des": "User deleted"});
+                                }else{
+                                    res.status(400);
+                                    res.json({'status':400,'des':'Missing token in request or incorrect'});
+                                }
+                            }else {
                                 res.status(404);
                                 var error = {"status": 404, "des": "User not found"};
                                 res.json(error);
                             }
-                        }else{
-                                res.status(400);
-                                res.json({'status':400,'des':'Missing token in request'});
-                        }
                             break;
                 }
             });
@@ -252,23 +255,22 @@ router.get('/users/:id', function(req, res, next) {
                     }
                     break;
                 case 'json':
-                    if(req.headers['access-token']!= undefined
-                        && req.headers['access-token'] == md5(user.password)){
 
                         if(!err && user != null){
-                            user.password = md5(user.password);
-                            res.json(user);
+                            if(req.headers['access-token']!= undefined
+                                && req.headers['access-token'] == md5(user.password)){
+                                user.password = md5(user.password);
+                                res.json(user);
+                            }else{
+                                res.status(400);
+                                res.json({'status':400,'des':'Missing token in request or incorrect'});
+                            }
                         }else{
                             res.status(404);
                             var error = {"status":404,"des":"User not found"};
                             res.json(error);
                         }
-                    }else{
-                        res.status(400);
-                        res.json({'status':400,'des':'Missing token in request'});
-                    }
                     break;
-
             }
         });
 
@@ -282,7 +284,7 @@ router.get('/users/:id', function(req, res, next) {
 
 router.put('/users/:id/gcmtoken/', function (req,res,next) {
     if(req.accepts('html')=='html') {
-        var checkedParams = checkPostRequest(req,gcmAttributes);
+        var checkedParams = auth.checkPostRequest(req,gcmAttributes);
         if(checkedParams == ''){
             if (req.headers['access-token'] != undefined
                 && req.headers['access-token'] == md5(user.password)) {
@@ -301,7 +303,7 @@ router.put('/users/:id/gcmtoken/', function (req,res,next) {
 
             } else {
                 res.status(400);
-                res.json({'status': 400, 'des': 'Missing token in request'});
+                res.json({'status': 400, 'des': 'Missing token in request or incorrect'});
             }
         }else {
             res.status(400);
@@ -320,22 +322,6 @@ router.put('/users/:id/gcmtoken/', function (req,res,next) {
 
 });
 
-function checkPostRequest(req,objectmethods){
-    var params = '';
-    var first = true;
-
-    objectmethods.forEach(function(entry) {
-        if(typeof req.body[entry] === 'undefined'){
-            if(first){
-                first= false;
-                params += entry;
-            }else{
-                params +=','+entry;
-            }
-        }
-    });
-    return params;
-}
 
 function createNewUser(req){
     var user = new User;
