@@ -46,6 +46,7 @@ router.get('/users/:id/measurements',function (req,res,next) {
                                         var error = {"status": 404, "des": "Error obtaining measurements"};
                                         res.json(error);
                                     } else {
+                                        res.status(200);
                                         res.json(user.measurements);
                                     }
                                 } else {
@@ -81,7 +82,7 @@ router.get('/users/:id/measurements/add',function (req,res,next) {
 
 });
 
-router.post('/users/:id/measurements',function (req,res,next) {
+router.post('/users/:id/measurements/:lang',function (req,res,next) {
 
     var accept = accepts(req);
 
@@ -105,7 +106,6 @@ router.post('/users/:id/measurements',function (req,res,next) {
                                                 return res.send('<h1>Error 500</h1> <p>Measurement cannot be added</p> ');
                                             } else {
                                                 var message = Notification.sendWebNotification(res, newuser);
-                                                res.render('notification', {'message': message, 'user': newuser});
                                             }
                                         });
                                     });
@@ -123,10 +123,10 @@ router.post('/users/:id/measurements',function (req,res,next) {
                         if (!err) {
                             auth.getTokenInUpdateMethods(req.params.id, function (terror, pass) {
                                 if (req.headers['access-token'] != undefined
-                                    && req.headers['access-token'] == md5(pass.password)) {
+                                    && req.headers['access-token'] == md5(pass.password) && !terror) {
                                     User.findByIdAndUpdate(
                                         req.params.id,
-                                        {$push: {"measurements": measurement}},
+                                        {$push: {"measurements": measurement}, $inc: {"totalinsertions": 1}},
                                         {safe: true, upsert: true},
                                         function (oerr, user) {
                                             User.findById({'_id': req.params.id}, function (nerr, newuser) {  //find the new user to return update
@@ -135,7 +135,7 @@ router.post('/users/:id/measurements',function (req,res,next) {
                                                     var error = {"status": 500, "des": "Error adding measurement"};
                                                     res.json(error);
                                                 } else {
-                                                    Notification.sendMobileNotification(user);
+                                                    Notification.sendMobileNotification(newuser,req.params.lang);
                                                     res.json(measurement);
                                                 }
                                             });

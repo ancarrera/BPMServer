@@ -283,28 +283,33 @@ router.get('/users/:id', function(req, res, next) {
 });
 
 router.put('/users/:id/gcmtoken/', function (req,res,next) {
-    if(req.accepts('html')=='html') {
+    if(req.accepts('json')=='json') {
         var checkedParams = auth.checkPostRequest(req,gcmAttributes);
         if(checkedParams == ''){
-            if (req.headers['access-token'] != undefined
-                && req.headers['access-token'] == md5(user.password)) {
+            auth.getTokenInUpdateMethods(req.params.id, function(terr,pass) {
 
-                    User.findOneAndUpdate({'_id': req.params.id}, {$set: {'gcmToken': req.params.gcmToken}},
-                        {safe: true, upsert: true}, function (err, _user) {
+                if (req.headers['access-token'] != undefined
+                    && req.headers['access-token'] == md5(pass.password) && !terr) {
+
+
+                    User.findOneAndUpdate({'_id': req.params.id}, {$set: {'gcmToken': req.body.gcmToken}},
+                        {safe: true, upsert: true}, function (err) {
                             if (err) {
                                 res.status(500);
                                 var error = {"status": 500, "des": "User can not be edited"};
                                 res.json(error);
                             } else {
                                 res.status(200);
-                                res.json(user);
+                                var responsegcm = {"status": 200, "des": "Token sent correctly"}
+                                res.json(responsegcm);
                             }
                         });
 
-            } else {
-                res.status(400);
-                res.json({'status': 400, 'des': 'Missing token in request or incorrect'});
-            }
+                } else {
+                    res.status(400);
+                    res.json({'status': 400, 'des': 'Missing token in request or incorrect'});
+                }
+            });
         }else {
             res.status(400);
             var error_json = {
@@ -321,6 +326,43 @@ router.put('/users/:id/gcmtoken/', function (req,res,next) {
     }
 
 });
+
+router.delete('/users/:id/gcmtoken/', function (req,res,next) {
+
+    if(req.accepts('json')=='json') {
+
+        auth.getTokenInUpdateMethods(req.params.id, function(terr,pass){
+
+            if (req.headers['access-token'] != undefined
+                && req.headers['access-token'] == md5(pass.password) && !terr ) {
+
+                User.findOneAndUpdate({'_id': req.params.id}, {$set: {'gcmToken': ''}},
+                    {safe: true, upsert: true}, function (err) {
+                        if (err) {
+                            res.status(500);
+                            var error = {"status": 500, "des": "User can not be edited"};
+                            res.json(error);
+                        } else {
+                            res.status(200);
+                            var response = {"status":200,"des":"Token delete correctly"}
+                            res.json(response);
+                        }
+                    });
+
+            } else {
+                res.status(400);
+                res.json({'status': 400, 'des': 'Missing token in request or incorrect'});
+            }
+        });
+
+    }else{
+        res.header({'Content-Type':'text/plain'});
+        res.status(406);
+        res.send('Not acceptable');
+    }
+
+});
+
 
 
 function createNewUser(req){

@@ -5,8 +5,6 @@ var gcm = require('node-gcm');
 var message = new gcm.Message();
 
 var API_KEY = 'AIzaSyAumnnNg2xWUHqI2l7qUkyeHmoCjqpheHE';
-var testRegId = 'APA91bEmT3cFVrblef93mZoOf0K_bvokxRIhDzlqbYw1Bk2MHbLePE77VPoE3bc5KrHlGHcUEX_KhA7Fk2bQEC4-N38Zw0GRMRhlxHtg_PxaWzU8zoL-tYWrFDy-9CK2I0uZto1j61RKwvQCvpbEKhIcRTLhr233wJ96ezaTvRa51Ezk85J2m94';
-
 var DIANA_SYSTOLIC_LIMIT=170;
 var DIANA_DIASTOLIC_LIMIT=110;
 var REST_DIANA_LIMIT = 20;
@@ -109,25 +107,25 @@ function sendMessage(statusNotification,user){
     var sender = new gcm.Sender(API_KEY);
     var message = new gcm.Message();
     message.addData("message",statusNotification);
-    sender.send(message, [testRegId], function (err, result) {
+    sender.send(message, user.gcmToken,function (err, result) {
         if(err) console.error(err);
         else    console.log(result);
     });
 }
-function createNotificationMessage(user){
+function createNotificationMessage(user,lan){
 
     var fiveLastMeasures = getFiveLastMeasurements(user);
     var average = calculateAverages(fiveLastMeasures);
     var status = calculatePatientStatus(average);
-    var message = prepareMessage(status,'es');
+    var message = prepareMessage(status,lan);
 
     return message;
 }
 
-exports.sendMobileNotification = function (user){
+exports.sendMobileNotification = function (user,lan){
     if (isCorrectPostForNotification(user)){
         if (checkIfUserHasGCMRegid(user)){
-            var message = createNotificationMessage(user);
+            var message = createNotificationMessage(user,lan);
             sendMessage(message,user);
         }
     }
@@ -141,7 +139,9 @@ exports.sendWebNotification = function (res,user){
         var status = calculatePatientStatus(average);
         var message = prepareMessage(status,'en');
         res.status(200);
-        return message;
-
+        res.render('notification', {'message': message, 'user': user});
+    }else{
+        res.status(200);
+        res.redirect('/users/'+user._id+'/measurements');
     }
 }

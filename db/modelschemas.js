@@ -25,7 +25,6 @@ var UserSchema = new Schema({
     'country':{ type:String,default:""},
     'password':{ type:String,default:""},
     'totalinsertions':{ type:Number,default:0},
-    'securitytoken':{type:String,default:""},
     'measurements':[MeasuremetsSchema]
 });
 
