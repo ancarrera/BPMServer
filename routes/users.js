@@ -282,7 +282,7 @@ router.get('/users/:id', function(req, res, next) {
 
 });
 
-router.put('/users/:id/gcmtoken/', function (req,res,next) {
+router.put('/users/:id/gcmtoken', function (req,res,next) {
     if(req.accepts('json')=='json') {
         var checkedParams = auth.checkPostRequest(req,gcmAttributes);
         if(checkedParams == ''){
@@ -327,7 +327,7 @@ router.put('/users/:id/gcmtoken/', function (req,res,next) {
 
 });
 
-router.delete('/users/:id/gcmtoken/', function (req,res,next) {
+router.delete('/users/:id/gcmtoken', function (req,res,next) {
 
     if(req.accepts('json')=='json') {
 

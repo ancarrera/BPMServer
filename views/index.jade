@@ -7,25 +7,64 @@ block navbar
         a(href="/login") Login
 block content
   .conatainer
-    nav.jumbotron
-      h1= title
+    div(class="jumbotron")
+
+      div(class="row")
+        div(class="col-lg-12",style="text-align: center;")
+          h1 #{title}
+
+  div(class="list-group")
+    span(class="list-group-item active",style="background-color: #337ab7;font-size:xx-large;")
+      span( class="list-group-item-heading",style="text-align: center")
+        p GET
+    p
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}  => Params: {id}: user id
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token for JSON requests
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/create
       p
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/edit  => Params: {id}: user id #[strong &nbsp; (Only HTML)]
       p
-      p GET /users/{id} => {id}:user_id
-      p GET /users/{id}/measurements  =>  {id}:user_id
-      p GET /login (only text/html)
-      p GET /register (only text/html)
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/measurements => Params: {id}: user id
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token for JSON requests
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/measurements/add  => Params: {id}: user id #[strong &nbsp; (Only HTML)]
       p
-      p POST /login  =>  post_attributes: email,password
-      p POST /users/{id}/measurements/{lan}  =>  {id}: user_id, {lan}:language [en,es] post_attributes: systolic pressure, diastolic pressure, pulse
-      p POST /users/{id}  =>  {id}: user_id
-      p POST /users/{id}  =>   {id}: user_id post_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /login #[strong &nbsp; (Only HTML)]
       p
-      p
-      p PUT /users/{id}  =>  {id}: user_id    put_attributes: name,firstsurname,secondsurname,age,email,city,administration,country, password
-      p
-      p
-      p DELETE /users/{id}  =>  {id}: user_id
-      p
-      p All methods offers html and JSON except GET /login and  GET /register
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /logout #[strong &nbsp; (Only HTML)]
+
+  div(class="list-group")
+    span(class="list-group-item active",style="background-color: #337ab7;font-size:xx-large;")
+      span( class="list-group-item-heading",style="text-align: center")
+        p POST
+    p
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/create
+      p(class="list-group-item",style="font-size: large; background-color: #f0f0f0") Attributes: name, firstsurname, secondsurname, email, age, country, administration, city, password
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /login
+      p(class="list-group-item",style="font-size: large; background-color: #f0f0f0") Attributes: username, password
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/measurements/{lan}  => Params: {id}: user id, {lan}: language [es, en]
+      p(class="list-group-item",style="font-size: large; background-color: #f0f0f0") Attributes: systolic, diastolic, pulse
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token for JSON requests
+
+  div(class="list-group")
+    span(class="list-group-item active",style="background-color: #337ab7;font-size:xx-large;")
+      span( class="list-group-item-heading",style="text-align: center")
+        p PUT
+    p
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id} => {id}: user id
+      p(class="list-group-item",style="font-size: large; background-color: #f0f0f0") Attributes: name, firstsurname, secondsurname, email, age, country, administration, city, password
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token for JSON requests
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/gcmtoken => {id}: user id #[strong &nbsp; (Only JSON)]
+      p(class="list-group-item",style="font-size: large; background-color: #f0f0f0") Attributes: gcmToken
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token
+
+  div(class="list-group")
+    span(class="list-group-item active",style="background-color: #337ab7;font-size:xx-large;")
+      span( class="list-group-item-heading",style="text-align: center")
+        p DELETE
+    p
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id} => Params: {id}: user id
+    p(class="list-group-item",style="font-size: x-large; background-color: #f0f0f0") /users/{id}/gcmtoken  => Params: {id}: user id #[strong &nbsp; (Only JSON)]
+      p(class="list-group-item",style="font-size: medium; background-color: #f0f0f0") Necessary MD5 token
+
+  p *All methods offer HTML and JSON except mentioned with only HTML or only JSON.
 
