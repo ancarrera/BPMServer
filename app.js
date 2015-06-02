@@ -7,7 +7,7 @@ var methodOverride = require('method-override');
 var mongoose = require('mongoose');
 var app  = express();
 
-var uri = "mongodb://127.0.0.1:27017/BPMtest";
+var uri = "mongodb://127.0.0.1:27017/BPMdb";
 global.db = mongoose.connect(uri);
 
 var routes = require('./routes/index');

@@ -39,8 +39,14 @@ router.post('/login',function(req,res,next){
                 break;
             case 'json':
                 User.findOne({'email':req.body.email},function(err,user){
-                    user.password = md5(user.password);
-                    res.json(user);
+                    if(user != null){
+                        user.password = md5(user.password);
+                        res.json(user);
+                    }else{
+                        res.status(400);
+                        res.json({'status':400,'des':'Bad request'});
+                    }
+
                 });
                 break;
         }
